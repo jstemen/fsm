@@ -3,6 +3,8 @@ plugins {
     `java-library`
     id("io.freefair.lombok") version "8.6"
     id("com.diffplug.spotless") version "6.25.0"
+    // Add JaCoCo plugin
+    jacoco
 }
 
 repositories {
@@ -46,7 +48,44 @@ dependencyLocking {
 // Add this to your existing build.gradle.kts
 tasks.test {
     useJUnitPlatform()
+    // Enable JaCoCo for tests
+    finalizedBy(tasks.jacocoTestReport)
 }
+
+// Configure JaCoCo Test Report
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+// Configure JaCoCo Test Coverage Verification
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+
+    violationRules {
+        rule {
+            limit {
+                // Set minimum code coverage to 80%
+                minimum = "1".toBigDecimal()
+            }
+        }
+
+        // You can add more granular rules if needed
+        rule {
+            element = "CLASS"
+            excludes = listOf("*.Library") // Optional: exclude specific classes
+        }
+    }
+}
+
+// Add a check task that depends on the coverage verification
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
 // Spotless configuration with Google Java Format
 spotless {
     java {
@@ -69,4 +108,8 @@ spotless {
     kotlinGradle {
         ktlint()
     }
+}
+// Make build task run spotlessApply before building
+tasks.named("build") {
+    dependsOn("spotlessApply")
 }
