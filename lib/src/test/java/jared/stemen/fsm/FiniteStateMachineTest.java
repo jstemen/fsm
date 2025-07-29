@@ -28,7 +28,7 @@ class FiniteStateMachineTest {
   }
 
   @Test
-  void exerciseDoor() {
+  void exerciseComplexDoorInteractions() {
 
     final FiniteStateMachine<DoorState, DoorEvent> fsm = new FiniteStateMachine<>(DoorState.OPEN);
 
