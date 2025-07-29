@@ -68,7 +68,7 @@ tasks.jacocoTestCoverageVerification {
         rule {
             limit {
                 // Set minimum code coverage to 80%
-                minimum = "0.8".toBigDecimal()
+                minimum = "1".toBigDecimal()
             }
         }
 
