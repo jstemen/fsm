@@ -33,3 +33,7 @@ dependencies {
 dependencyLocking {
     lockAllConfigurations()
 }
+// Add this to your existing build.gradle.kts
+tasks.test {
+    useJUnitPlatform()
+}
