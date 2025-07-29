@@ -35,7 +35,7 @@ class LibraryTest {
   @Test
   void exerciseDoor() {
 
-    FSM<DoorState, DoorEvent> fsm = new FSM<>(DoorState.OPEN);
+    final FSM<DoorState, DoorEvent> fsm = new FSM<>(DoorState.OPEN);
 
     fsm.link(
         LinkBuilder.<DoorState, DoorEvent>builder()
