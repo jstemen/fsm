@@ -13,6 +13,15 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
   private final Map<STATE, Map<EVENT, StateAndActions<STATE>>> stateTransitionsMap =
       new HashMap<>();
 
+  /**
+   * Creates a new Finite State Machine with the specified initial state.
+   *
+   * <p>The FSM is initialized with no transition links. Links must be added using the {@link
+   * #link(Link) link} method before events can be processed.
+   *
+   * @param state The initial state of the FSM
+   * @throws NullPointerException if the provided state is null
+   */
   public FiniteStateMachineImpl(STATE state) {
     this.state = state;
   }

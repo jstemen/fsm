@@ -199,4 +199,4 @@ This project was developed incrementally with a test-driven approach.  Please se
 
 ## AI Assistance
 
-This project documentation was enhanced with the assistance of Claude 3.7, an AI assistant from Anthropic. 
+This project was enhanced with the assistance of Claude 3.7, an AI assistant from Anthropic. 
