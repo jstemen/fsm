@@ -44,7 +44,7 @@ class FiniteStateMachineTest {
 
   @BeforeEach
   void setUp() {
-    laundryMachine = new FiniteStateMachine<>(LaundryState.IDLE);
+    laundryMachine = new FiniteStateMachineImpl<>(LaundryState.IDLE);
     waterLevel = new AtomicInteger(0);
     temperature = new AtomicInteger(0);
     doorLocked = new AtomicBoolean(false);

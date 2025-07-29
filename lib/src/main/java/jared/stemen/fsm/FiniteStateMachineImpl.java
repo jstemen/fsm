@@ -1,0 +1,46 @@
+package jared.stemen.fsm;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import lombok.*;
+
+public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
+  @Getter @NonNull private STATE state;
+
+  private final Map<STATE, Map<EVENT, StateAndActions<STATE>>> stateTransitionsMap =
+      new HashMap<>();
+
+  public FiniteStateMachineImpl(STATE state) {
+    this.state = state;
+  }
+
+  @Override
+  public FiniteStateMachine<STATE, EVENT> link(LinkBuilder<STATE, EVENT> builder) {
+    val eventToStateActions =
+        stateTransitionsMap.computeIfAbsent(builder.getSourceState(), (k) -> new HashMap<>());
+    if (eventToStateActions.containsKey(builder.getEvent())) {
+      throw new IllegalStateException(
+          "Event %s already linked to state %s"
+              .formatted(
+                  builder.getEvent(), eventToStateActions.get(builder.getEvent()).getState()));
+    }
+    eventToStateActions.put(
+        builder.getEvent(), new StateAndActions<>(builder.getTargetState(), builder.getActions()));
+    return this;
+  }
+
+  @Override
+  public STATE performEvent(EVENT event) {
+    val eventToStateActions = stateTransitionsMap.getOrDefault(state, Map.of());
+    val stateAndActions = eventToStateActions.get(event);
+    if (stateAndActions == null) {
+      throw new IllegalStateException(
+          "%s is not a legal event for state %s legal events for this state are: %s"
+              .formatted(event, state, eventToStateActions.keySet()));
+    }
+    stateAndActions.getActions().forEach(Runnable::run);
+    state = stateAndActions.getState();
+    return state;
+  }
+}

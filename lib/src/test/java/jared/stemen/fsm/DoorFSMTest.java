@@ -29,7 +29,8 @@ class DoorFSMTest {
   @Test
   void exerciseComplexDoorInteractions() {
     // Create FSM with initial state OPEN
-    final FiniteStateMachine<DoorState, DoorEvent> fsm = new FiniteStateMachine<>(DoorState.OPEN);
+    final FiniteStateMachine<DoorState, DoorEvent> fsm =
+        new FiniteStateMachineImpl<>(DoorState.OPEN);
 
     // Define all valid state transitions
     fsm.link(
