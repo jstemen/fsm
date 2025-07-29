@@ -6,9 +6,10 @@ package jared.stemen.fsm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.junit.jupiter.api.Test;
 
 @Slf4j
 class LibraryTest {
@@ -18,36 +19,72 @@ class LibraryTest {
     assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
   }
 
-  public static enum DoorState {OPEN, CLOSED, LOCKED}
-  public static enum DoorEvent {OPEN_DOOR, CLOSE_DOOR, LOCK_DOOR, UNLOCK_DOOR}
+  public enum DoorState {
+    OPEN,
+    CLOSED,
+    LOCKED
+  }
+
+  public enum DoorEvent {
+    OPEN_DOOR,
+    CLOSE_DOOR,
+    LOCK_DOOR,
+    UNLOCK_DOOR
+  }
 
   @Test
-  void exerciseDoor(){
+  void exerciseDoor() {
 
-    FSM<DoorEvent, DoorEvent> fsm = new FSM(DoorState.OPEN );
+    FSM<DoorState, DoorEvent> fsm = new FSM<>(DoorState.OPEN);
 
-    fsm.link(DoorState.OPEN).event(DoorEvent.CLOSE_DOOR).addAction(() -> log.info("opening door")).target(DoorState.CLOSED);
-    fsm.link(DoorState.CLOSED).event(DoorEvent.OPEN_DOOR).addAction(() -> log.info("opening door")).target(DoorState.OPEN);
-    fsm.link(DoorState.CLOSED).event(DoorEvent.LOCK_DOOR).addAction(() -> log.info("opening door")).target(DoorState.LOCKED);
-    fsm.link(DoorState.LOCKED).event(DoorEvent.UNLOCK_DOOR).addAction(() -> log.info("opening door")).target(DoorState.CLOSED);
+    fsm.link(
+        LinkBuilder.<DoorState, DoorEvent>builder()
+            .sourceState(DoorState.OPEN)
+            .event(DoorEvent.CLOSE_DOOR)
+            .action(() -> log.info("closing door"))
+            .targetState(DoorState.CLOSED)
+            .build());
+
+    fsm.link(
+        LinkBuilder.<DoorState, DoorEvent>builder()
+            .sourceState(DoorState.CLOSED)
+            .event(DoorEvent.OPEN_DOOR)
+            .action(() -> log.info("opening door"))
+            .targetState(DoorState.OPEN)
+            .build());
+
+    fsm.link(
+        LinkBuilder.<DoorState, DoorEvent>builder()
+            .sourceState(DoorState.CLOSED)
+            .event(DoorEvent.LOCK_DOOR)
+            .action(() -> log.info("closing door"))
+            .targetState(DoorState.LOCKED)
+            .build());
+
+    fsm.link(
+        LinkBuilder.<DoorState, DoorEvent>builder()
+            .sourceState(DoorState.LOCKED)
+            .event(DoorEvent.UNLOCK_DOOR)
+            .action(() -> log.info("unlocking door"))
+            .targetState(DoorState.CLOSED)
+            .build());
 
     assertThat(fsm.getState()).isEqualTo(DoorState.OPEN);
 
     // todo validate message
-    assertThrows(IllegalStateException.class, () ->{
-      fsm.peformEvent(DoorEvent.OPEN_DOOR);
-    });
+    assertThrows(
+        IllegalStateException.class,
+        () -> {
+          fsm.performEvent(DoorEvent.OPEN_DOOR);
+        });
 
-    assertThrows(IllegalStateException.class, () ->{
-      fsm.peformEvent(DoorEvent.LOCK_DOOR);
-    });
+    assertThrows(
+        IllegalStateException.class,
+        () -> {
+          fsm.performEvent(DoorEvent.LOCK_DOOR);
+        });
 
-
-    val out = fsm.peformEvent(DoorEvent.CLOSE_DOOR);
+    val out = fsm.performEvent(DoorEvent.CLOSE_DOOR);
     assertThat(out).isEqualTo(DoorState.CLOSED);
-
-
-
-
   }
 }

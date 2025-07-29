@@ -21,6 +21,10 @@ dependencies {
     api(libs.commons.math3)
     implementation(libs.guava)
 
+// SLF4J API
+    implementation("org.slf4j:slf4j-api:2.0.+")
+// Logback implementation
+    implementation("ch.qos.logback:logback-classic:1.4.+")
     // Lombok dependencies using the single version variable
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
