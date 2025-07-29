@@ -1,10 +1,8 @@
 package jared.stemen.fsm;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.val;
@@ -12,13 +10,6 @@ import lombok.val;
 @Data
 public class FiniteStateMachine<STATE, EVENT> {
   @NonNull private STATE state;
-
-  @AllArgsConstructor
-  @Data
-  private static class StateAndActions<STATE> {
-    @NonNull private final STATE state;
-    @NonNull private final List<Runnable> actions;
-  }
 
   private final Map<STATE, Map<EVENT, StateAndActions<STATE>>> stateMapMap = new HashMap<>();
 
