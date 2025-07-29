@@ -10,7 +10,8 @@ repositories {
 }
 
 val lombokVersion = "1.18.+"
-val mockitoVersion =  "5.11.+"
+val mockitoVersion = "5.11.+"
+val assertjVersion = "3.25.+" // Latest version of AssertJ
 
 dependencies {
     // Existing dependencies remain unchanged
@@ -24,15 +25,19 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:${lombokVersion}")
     testCompileOnly("org.projectlombok:lombok:${lombokVersion}")
     testAnnotationProcessor("org.projectlombok:lombok:${lombokVersion}")
+    
     // Mockito dependencies
     testImplementation("org.mockito:mockito-core:${mockitoVersion}")
     testImplementation("org.mockito:mockito-junit-jupiter:${mockitoVersion}")
-
+    
+    // AssertJ for fluent assertions
+    testImplementation("org.assertj:assertj-core:${assertjVersion}")
 }
 
 dependencyLocking {
     lockAllConfigurations()
 }
+
 // Add this to your existing build.gradle.kts
 tasks.test {
     useJUnitPlatform()

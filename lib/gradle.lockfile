@@ -10,6 +10,7 @@ net.bytebuddy:byte-buddy-agent:1.14.12=testCompileClasspath,testRuntimeClasspath
 net.bytebuddy:byte-buddy:1.14.12=testCompileClasspath,testRuntimeClasspath
 org.apache.commons:commons-math3:3.6.1=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.apiguardian:apiguardian-api:1.1.2=testCompileClasspath
+org.assertj:assertj-core:3.25.3=testCompileClasspath,testRuntimeClasspath
 org.jspecify:jspecify:1.0.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
 org.junit.jupiter:junit-jupiter-api:5.12.1=testCompileClasspath,testRuntimeClasspath
 org.junit.jupiter:junit-jupiter-engine:5.12.1=testRuntimeClasspath
