@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import jared.stemen.fsm.impl.FiniteStateMachineImpl;
+import jared.stemen.fsm.impl.LinkImpl;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,28 +36,28 @@ class DoorFSMTest {
 
     // Define all valid state transitions
     fsm.link(
-            LinkBuilder.<DoorState, DoorEvent>builder()
+            LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.OPEN)
                 .event(DoorEvent.CLOSE_DOOR)
                 .action(() -> log.info("closing door"))
                 .targetState(DoorState.CLOSED)
                 .build())
         .link(
-            LinkBuilder.<DoorState, DoorEvent>builder()
+            LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.CLOSED)
                 .event(DoorEvent.OPEN_DOOR)
                 .action(() -> log.info("opening door"))
                 .targetState(DoorState.OPEN)
                 .build())
         .link(
-            LinkBuilder.<DoorState, DoorEvent>builder()
+            LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.CLOSED)
                 .event(DoorEvent.LOCK_DOOR)
                 .action(() -> log.info("locking door"))
                 .targetState(DoorState.LOCKED)
                 .build())
         .link(
-            LinkBuilder.<DoorState, DoorEvent>builder()
+            LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.LOCKED)
                 .event(DoorEvent.UNLOCK_DOOR)
                 .action(() -> log.info("unlocking door"))

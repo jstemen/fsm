@@ -1,4 +1,4 @@
-package jared.stemen.fsm;
+package jared.stemen.fsm.impl;
 
 import java.util.List;
 

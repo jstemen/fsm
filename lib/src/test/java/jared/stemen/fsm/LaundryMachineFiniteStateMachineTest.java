@@ -10,7 +10,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class FiniteStateMachineTest {
+import jared.stemen.fsm.impl.FiniteStateMachineImpl;
+import jared.stemen.fsm.impl.LinkImpl;
+
+public class LaundryMachineFiniteStateMachineTest {
 
   private enum LaundryState {
     IDLE,
@@ -53,21 +56,21 @@ class FiniteStateMachineTest {
     // Configure the laundry machine state transitions
     laundryMachine
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.IDLE)
                 .targetState(LaundryState.DOOR_OPEN)
                 .event(LaundryEvent.OPEN_DOOR)
                 .action(() -> operationLog.append("Door opened; "))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.DOOR_OPEN)
                 .targetState(LaundryState.LOADED)
                 .event(LaundryEvent.CLOSE_DOOR)
                 .action(() -> operationLog.append("Door closed; "))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.LOADED)
                 .targetState(LaundryState.WASHING)
                 .event(LaundryEvent.SELECT_WASH_CYCLE)
@@ -77,7 +80,7 @@ class FiniteStateMachineTest {
                 .action(() -> doorLocked.set(true))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.WASHING)
                 .targetState(LaundryState.RINSING)
                 .event(LaundryEvent.WASH_COMPLETE)
@@ -86,7 +89,7 @@ class FiniteStateMachineTest {
                 .action(() -> temperature.set(20))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.RINSING)
                 .targetState(LaundryState.SPINNING)
                 .event(LaundryEvent.RINSE_COMPLETE)
@@ -94,7 +97,7 @@ class FiniteStateMachineTest {
                 .action(() -> waterLevel.set(0))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.SPINNING)
                 .targetState(LaundryState.LOADED)
                 .event(LaundryEvent.SPIN_COMPLETE)
@@ -102,7 +105,7 @@ class FiniteStateMachineTest {
                 .action(() -> doorLocked.set(false))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.LOADED)
                 .targetState(LaundryState.DRYING)
                 .event(LaundryEvent.SELECT_DRY_CYCLE)
@@ -111,7 +114,7 @@ class FiniteStateMachineTest {
                 .action(() -> doorLocked.set(true))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.DRYING)
                 .targetState(LaundryState.CYCLE_COMPLETE)
                 .event(LaundryEvent.DRY_COMPLETE)
@@ -120,21 +123,21 @@ class FiniteStateMachineTest {
                 .action(() -> doorLocked.set(false))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.CYCLE_COMPLETE)
                 .targetState(LaundryState.DOOR_OPEN)
                 .event(LaundryEvent.OPEN_DOOR)
                 .action(() -> operationLog.append("Door opened after cycle; "))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.CYCLE_COMPLETE)
                 .targetState(LaundryState.IDLE)
                 .event(LaundryEvent.RESET)
                 .action(() -> operationLog.append("Machine reset; "))
                 .build())
         .link(
-            LinkBuilder.<LaundryState, LaundryEvent>builder()
+            LinkImpl.<LaundryState, LaundryEvent>builder()
                 .sourceState(LaundryState.LOADED)
                 .targetState(LaundryState.DOOR_OPEN)
                 .event(LaundryEvent.OPEN_DOOR)
@@ -299,7 +302,7 @@ class FiniteStateMachineTest {
     assertThatThrownBy(
             () ->
                 laundryMachine.link(
-                    LinkBuilder.<LaundryState, LaundryEvent>builder()
+                    LinkImpl.<LaundryState, LaundryEvent>builder()
                         .sourceState(LaundryState.IDLE)
                         .targetState(LaundryState.LOADED) // Different target
                         .event(LaundryEvent.OPEN_DOOR) // Same event already defined

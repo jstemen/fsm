@@ -1,8 +1,10 @@
-package jared.stemen.fsm;
+package jared.stemen.fsm.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import jared.stemen.fsm.FiniteStateMachine;
+import jared.stemen.fsm.Link;
 import lombok.*;
 
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
@@ -16,7 +18,7 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
   }
 
   @Override
-  public FiniteStateMachine<STATE, EVENT> link(LinkBuilder<STATE, EVENT> builder) {
+  public FiniteStateMachine<STATE, EVENT> link(Link<STATE, EVENT> builder) {
     val eventToStateActions =
         stateTransitionsMap.computeIfAbsent(builder.getSourceState(), (k) -> new HashMap<>());
     if (eventToStateActions.containsKey(builder.getEvent())) {

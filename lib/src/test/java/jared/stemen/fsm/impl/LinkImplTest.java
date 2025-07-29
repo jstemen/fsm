@@ -1,4 +1,4 @@
-package jared.stemen.fsm;
+package jared.stemen.fsm.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
-class LinkBuilderTest {
+class LinkImplTest {
 
   private enum TestState {
     STATE_A,
@@ -29,18 +29,18 @@ class LinkBuilderTest {
     TestEvent event = TestEvent.EVENT_1;
 
     // When
-    LinkBuilder<TestState, TestEvent> link =
-        LinkBuilder.<TestState, TestEvent>builder()
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
             .sourceState(sourceState)
             .targetState(targetState)
             .event(event)
             .build();
 
     // Then
-    assertThat(link.getSourceState()).isEqualTo(sourceState);
-    assertThat(link.getTargetState()).isEqualTo(targetState);
-    assertThat(link.getEvent()).isEqualTo(event);
-    assertThat(link.getActions()).isNotNull().isEmpty();
+    assertThat(linkImpl.getSourceState()).isEqualTo(sourceState);
+    assertThat(linkImpl.getTargetState()).isEqualTo(targetState);
+    assertThat(linkImpl.getEvent()).isEqualTo(event);
+    assertThat(linkImpl.getActions()).isNotNull().isEmpty();
   }
 
   @Test
@@ -53,8 +53,8 @@ class LinkBuilderTest {
     Runnable action = counter::incrementAndGet;
 
     // When
-    LinkBuilder<TestState, TestEvent> link =
-        LinkBuilder.<TestState, TestEvent>builder()
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
             .sourceState(sourceState)
             .targetState(targetState)
             .event(event)
@@ -62,13 +62,13 @@ class LinkBuilderTest {
             .build();
 
     // Then
-    assertThat(link.getSourceState()).isEqualTo(sourceState);
-    assertThat(link.getTargetState()).isEqualTo(targetState);
-    assertThat(link.getEvent()).isEqualTo(event);
-    assertThat(link.getActions()).hasSize(1);
+    assertThat(linkImpl.getSourceState()).isEqualTo(sourceState);
+    assertThat(linkImpl.getTargetState()).isEqualTo(targetState);
+    assertThat(linkImpl.getEvent()).isEqualTo(event);
+    assertThat(linkImpl.getActions()).hasSize(1);
 
     // When actions are executed
-    link.getActions().forEach(Runnable::run);
+    linkImpl.getActions().forEach(Runnable::run);
 
     // Then counter should be incremented
     assertThat(counter.get()).isEqualTo(1);
@@ -84,8 +84,8 @@ class LinkBuilderTest {
     AtomicInteger counter2 = new AtomicInteger(10);
 
     // When
-    LinkBuilder<TestState, TestEvent> link =
-        LinkBuilder.<TestState, TestEvent>builder()
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
             .sourceState(sourceState)
             .targetState(targetState)
             .event(event)
@@ -94,13 +94,13 @@ class LinkBuilderTest {
             .build();
 
     // Then
-    assertThat(link.getSourceState()).isEqualTo(sourceState);
-    assertThat(link.getTargetState()).isEqualTo(targetState);
-    assertThat(link.getEvent()).isEqualTo(event);
-    assertThat(link.getActions()).hasSize(2);
+    assertThat(linkImpl.getSourceState()).isEqualTo(sourceState);
+    assertThat(linkImpl.getTargetState()).isEqualTo(targetState);
+    assertThat(linkImpl.getEvent()).isEqualTo(event);
+    assertThat(linkImpl.getActions()).hasSize(2);
 
     // When actions are executed
-    link.getActions().forEach(Runnable::run);
+    linkImpl.getActions().forEach(Runnable::run);
 
     // Then counters should be incremented
     assertThat(counter1.get()).isEqualTo(1);
@@ -120,8 +120,8 @@ class LinkBuilderTest {
     actionsList.add(counter2::incrementAndGet);
 
     // When
-    LinkBuilder<TestState, TestEvent> link =
-        LinkBuilder.<TestState, TestEvent>builder()
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
             .sourceState(sourceState)
             .targetState(targetState)
             .event(event)
@@ -129,13 +129,13 @@ class LinkBuilderTest {
             .build();
 
     // Then
-    assertThat(link.getSourceState()).isEqualTo(sourceState);
-    assertThat(link.getTargetState()).isEqualTo(targetState);
-    assertThat(link.getEvent()).isEqualTo(event);
-    assertThat(link.getActions()).hasSize(2);
+    assertThat(linkImpl.getSourceState()).isEqualTo(sourceState);
+    assertThat(linkImpl.getTargetState()).isEqualTo(targetState);
+    assertThat(linkImpl.getEvent()).isEqualTo(event);
+    assertThat(linkImpl.getActions()).hasSize(2);
 
     // When actions are executed
-    link.getActions().forEach(Runnable::run);
+    linkImpl.getActions().forEach(Runnable::run);
 
     // Then counters should be incremented
     assertThat(counter1.get()).isEqualTo(1);
@@ -151,7 +151,7 @@ class LinkBuilderTest {
     // When/Then
     assertThatThrownBy(
             () ->
-                LinkBuilder.<TestState, TestEvent>builder()
+                LinkImpl.<TestState, TestEvent>builder()
                     .sourceState(null)
                     .targetState(targetState)
                     .event(event)
@@ -169,7 +169,7 @@ class LinkBuilderTest {
     // When/Then
     assertThatThrownBy(
             () ->
-                LinkBuilder.<TestState, TestEvent>builder()
+                LinkImpl.<TestState, TestEvent>builder()
                     .sourceState(sourceState)
                     .targetState(null)
                     .event(event)
@@ -187,7 +187,7 @@ class LinkBuilderTest {
     // When/Then
     assertThatThrownBy(
             () ->
-                LinkBuilder.<TestState, TestEvent>builder()
+                LinkImpl.<TestState, TestEvent>builder()
                     .sourceState(sourceState)
                     .targetState(targetState)
                     .event(null)
