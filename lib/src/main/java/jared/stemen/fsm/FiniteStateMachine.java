@@ -10,9 +10,8 @@ import lombok.NonNull;
 import lombok.val;
 
 @Data
-public class FSM<STATE, EVENT> {
-  private STATE state;
-  private EVENT event;
+public class FiniteStateMachine<STATE, EVENT> {
+  @NonNull private STATE state;
 
   @AllArgsConstructor
   @Data
@@ -23,19 +22,18 @@ public class FSM<STATE, EVENT> {
 
   private final Map<STATE, Map<EVENT, StateAndActions<STATE>>> stateMapMap = new HashMap<>();
 
-  public FSM(STATE state) {
+  public FiniteStateMachine(STATE state) {
     this.state = state;
   }
 
-  public FSM<STATE, EVENT> link(LinkBuilder<STATE, EVENT> builder) {
+  public FiniteStateMachine<STATE, EVENT> link(LinkBuilder<STATE, EVENT> builder) {
     val eventToStateActions =
         stateMapMap.computeIfAbsent(builder.getSourceState(), (k) -> new HashMap<>());
     if (eventToStateActions.containsKey(builder.getEvent())) {
       throw new IllegalStateException(
-          "Event "
-              + builder.getEvent()
-              + " already linked to state "
-              + eventToStateActions.get(builder.getEvent()).getState());
+          "Event %s already linked to state %s"
+              .formatted(
+                  builder.getEvent(), eventToStateActions.get(builder.getEvent()).getState()));
     }
     eventToStateActions.put(
         builder.getEvent(), new StateAndActions<>(builder.getTargetState(), builder.getActions()));
@@ -47,11 +45,8 @@ public class FSM<STATE, EVENT> {
     val stateAndActions = eventToStateActions.get(event);
     if (stateAndActions == null) {
       throw new IllegalStateException(
-          event
-              + " is not a legal event for state "
-              + state
-              + " legal events for this state are: "
-              + eventToStateActions.keySet());
+          "%s is not a legal event for state %s legal events for this state are: %s"
+              .formatted(event, state, eventToStateActions.keySet()));
     }
     stateAndActions.getActions().forEach(Runnable::run);
     state = stateAndActions.getState();

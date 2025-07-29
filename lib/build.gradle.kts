@@ -3,7 +3,6 @@ plugins {
     `java-library`
     id("io.freefair.lombok") version "8.6"
     id("com.diffplug.spotless") version "6.25.0"
-    // Add JaCoCo plugin
     jacoco
 }
 
@@ -69,7 +68,7 @@ tasks.jacocoTestCoverageVerification {
         rule {
             limit {
                 // Set minimum code coverage to 80%
-                minimum = "1".toBigDecimal()
+                minimum = "0.8".toBigDecimal()
             }
         }
 
