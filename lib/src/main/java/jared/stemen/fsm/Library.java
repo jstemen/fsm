@@ -4,7 +4,7 @@
 package jared.stemen.fsm;
 
 public class Library {
-    public boolean someLibraryMethod() {
-        return true;
-    }
+  public boolean someLibraryMethod() {
+    return true;
+  }
 }
