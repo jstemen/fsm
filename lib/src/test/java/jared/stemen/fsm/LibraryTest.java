@@ -3,14 +3,51 @@
  */
 package jared.stemen.fsm;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 
+@Slf4j
 class LibraryTest {
   @Test
   void someLibraryMethodReturnsTrue() {
     Library classUnderTest = new Library();
     assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
+  }
+
+  public static enum DoorState {OPEN, CLOSED, LOCKED}
+  public static enum DoorEvent {OPEN_DOOR, CLOSE_DOOR, LOCK_DOOR, UNLOCK_DOOR}
+
+  @Test
+  void exerciseDoor(){
+
+    FSM<DoorEvent, DoorEvent> fsm = new FSM(DoorState.OPEN );
+
+    fsm.link(DoorState.OPEN).event(DoorEvent.CLOSE_DOOR).addAction(() -> log.info("opening door")).target(DoorState.CLOSED);
+    fsm.link(DoorState.CLOSED).event(DoorEvent.OPEN_DOOR).addAction(() -> log.info("opening door")).target(DoorState.OPEN);
+    fsm.link(DoorState.CLOSED).event(DoorEvent.LOCK_DOOR).addAction(() -> log.info("opening door")).target(DoorState.LOCKED);
+    fsm.link(DoorState.LOCKED).event(DoorEvent.UNLOCK_DOOR).addAction(() -> log.info("opening door")).target(DoorState.CLOSED);
+
+    assertThat(fsm.getState()).isEqualTo(DoorState.OPEN);
+
+    // todo validate message
+    assertThrows(IllegalStateException.class, () ->{
+      fsm.peformEvent(DoorEvent.OPEN_DOOR);
+    });
+
+    assertThrows(IllegalStateException.class, () ->{
+      fsm.peformEvent(DoorEvent.LOCK_DOOR);
+    });
+
+
+    val out = fsm.peformEvent(DoorEvent.CLOSE_DOOR);
+    assertThat(out).isEqualTo(DoorState.CLOSED);
+
+
+
+
   }
 }
