@@ -176,7 +176,7 @@ This project was developed incrementally with a test-driven approach.  Please se
 
 1. **Initial Setup**: 
       - Researched other FSM frameworks to see what their DSLs looked like
-      - Mapped out rough sketch of the DSL I wanted to make.  See finite-state-machine-brainstorming.pdf
+      - Mapped out rough sketch of the DSL I wanted to make.  See [finite-state-machine-brainstorming.pdf](finite-state-machine-brainstorming.pdf)
       - Created Java project structure with Gradle
       - Added core dependencies (Lombok, JUnit, Mockito, AssertJ)
       - Configured build settings with Spotless and Google Java Format
