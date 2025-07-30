@@ -175,23 +175,25 @@ The report will be available in `lib/build/reports/jacoco/test/html/index.html`
 This project was developed incrementally with a test-driven approach.  Please see the git history for more details, but at a high level, the author did the following:
 
 1. **Initial Setup**: 
-   - Created Java project structure with Gradle
-   - Added core dependencies (Lombok, JUnit, Mockito, AssertJ)
-   - Configured build settings with Spotless and Google Java Format
+      - Researched other FSM frameworks to see what their DSLs looked like
+      - Mapped out rough sketch of the DSL I wanted to make.  See finite-state-machine-brainstorming.pdf
+      - Created Java project structure with Gradle
+      - Added core dependencies (Lombok, JUnit, Mockito, AssertJ)
+      - Configured build settings with Spotless and Google Java Format
 
 2. **DSL Planning**:
    - Developed initial test cases demonstrating the planned API usage
 
-3. **Backfilled the test with real logic**: 
+3. **Backfilled the Test with Real Logic**: 
    - Created the classes to make the test compile
    - Then added missing functionality to make the test pass
 
 4. **Testing & Refinement**:
       - Created comprehensive test suite for all components
       - Added JaCoCo for code coverage tracking
-      - Expanded door FSM test to validate all transitions
+      - Expanded door FSM test 
 
-4. **Architecture Improvements (Day 1)**:
+5. **Architecture Improvements**:
    - Refactored FSM to use interface-based design
    - Extracted StateAndActions as a separate class
    - Added more complex Laundry Machine example
@@ -199,4 +201,4 @@ This project was developed incrementally with a test-driven approach.  Please se
 
 ## AI Assistance
 
-This project was enhanced with the assistance of Claude 3.7, an AI assistant from Anthropic. 
+This project was enhanced with the assistance of Claude 3.7, an AI assistant from Anthropic.
