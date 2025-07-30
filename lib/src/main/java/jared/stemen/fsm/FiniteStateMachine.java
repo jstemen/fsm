@@ -34,6 +34,11 @@ public interface FiniteStateMachine<STATE, EVENT> {
    *   <li>Return the new state
    * </ol>
    *
+   * <p>Note on exception handling: If any of the actions (Runnables) throws an exception during
+   * execution, that exception will be logged but will not interrupt the transition. The FSM will
+   * continue executing any remaining actions and will complete the state transition as defined.
+   * This ensures that one failing action does not prevent the entire transition from occurring.
+   *
    * @param event The event to process
    * @return The new state after the transition
    * @throws IllegalStateException If the event is not valid for the current state

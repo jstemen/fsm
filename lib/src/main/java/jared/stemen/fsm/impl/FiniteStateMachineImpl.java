@@ -6,7 +6,9 @@ import java.util.Map;
 import jared.stemen.fsm.FiniteStateMachine;
 import jared.stemen.fsm.Link;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
   @Getter @NonNull private STATE state;
 
@@ -27,17 +29,16 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
   }
 
   @Override
-  public FiniteStateMachine<STATE, EVENT> link(Link<STATE, EVENT> builder) {
+  public FiniteStateMachine<STATE, EVENT> link(Link<STATE, EVENT> link) {
     val eventToStateActions =
-        stateTransitionsMap.computeIfAbsent(builder.getSourceState(), (k) -> new HashMap<>());
-    if (eventToStateActions.containsKey(builder.getEvent())) {
+        stateTransitionsMap.computeIfAbsent(link.getSourceState(), (k) -> new HashMap<>());
+    if (eventToStateActions.containsKey(link.getEvent())) {
       throw new IllegalStateException(
           "Event %s already linked to state %s"
-              .formatted(
-                  builder.getEvent(), eventToStateActions.get(builder.getEvent()).getState()));
+              .formatted(link.getEvent(), eventToStateActions.get(link.getEvent()).getState()));
     }
     eventToStateActions.put(
-        builder.getEvent(), new StateAndActions<>(builder.getTargetState(), builder.getActions()));
+        link.getEvent(), new StateAndActions<>(link.getTargetState(), link.getActions()));
     return this;
   }
 
@@ -50,7 +51,20 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
           "%s is not a legal event for state %s legal events for this state are: %s"
               .formatted(event, state, eventToStateActions.keySet()));
     }
-    stateAndActions.getActions().forEach(Runnable::run);
+    stateAndActions
+        .getActions()
+        .forEach(
+            runnable -> {
+              try {
+                runnable.run();
+              } catch (Exception e) {
+                log.error(
+                    "Exception thrown during action execution for event {} in state {}:. Execution will continue.",
+                    event,
+                    state,
+                    e);
+              }
+            });
     state = stateAndActions.getState();
     return state;
   }
