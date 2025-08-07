@@ -28,7 +28,7 @@ class StateAndActionsTest {
     actions.add(() -> log.info("Action 2"));
 
     // When
-    StateAndActions<TestState> stateAndActions = new StateAndActions<>(state, actions);
+    StateAndActions<TestState, Void> stateAndActions = new StateAndActions<>(state, actions);
 
     // Then
     assertThat(stateAndActions.getState()).isEqualTo(state);
@@ -43,7 +43,7 @@ class StateAndActionsTest {
     List<Runnable> actions = Collections.emptyList();
 
     // When
-    StateAndActions<TestState> stateAndActions = new StateAndActions<>(state, actions);
+    StateAndActions<TestState, Void> stateAndActions = new StateAndActions<>(state, actions);
 
     // Then
     assertThat(stateAndActions.getState()).isEqualTo(state);
@@ -57,7 +57,7 @@ class StateAndActionsTest {
     List<Runnable> actions = new ArrayList<>();
 
     // When/Then
-    assertThatThrownBy(() -> new StateAndActions<>(null, actions))
+    assertThatThrownBy(() -> new StateAndActions<Void, Void>(null, actions))
         .isInstanceOf(NullPointerException.class)
         .hasMessageContaining("state");
   }

@@ -39,6 +39,8 @@ public interface Link<STATE, EVENT> {
    */
   EVENT getEvent();
 
+  Delayed<EVENT> getDelayed();
+
   /**
    * Gets the list of actions to execute when this transition link is followed.
    *

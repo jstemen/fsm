@@ -12,8 +12,17 @@ import lombok.extern.slf4j.Slf4j;
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
   @Getter @NonNull private STATE state;
 
-  private final Map<STATE, Map<EVENT, StateAndActions<STATE>>> stateTransitionsMap =
+  private final SimpleScheduler<STATE, EVENT> scheduler;
+
+  private final Map<STATE, Map<EVENT, StateAndActions<STATE, EVENT>>> stateTransitionsMap =
       new HashMap<>();
+
+  // priority Queue future scheduled time, other need to track trasnistion
+  // on kick state, enqueue the follow up action into priority queue
+
+  // separate thread
+  // priority queue. peek() if < current time, then remove item and process
+  // else sleep 1 second
 
   /**
    * Creates a new Finite State Machine with the specified initial state.
@@ -24,12 +33,18 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
    * @param state The initial state of the FSM
    * @throws NullPointerException if the provided state is null
    */
+  public FiniteStateMachineImpl(STATE state, SimpleScheduler<STATE, EVENT> scheduler) {
+    this.state = state;
+    this.scheduler = scheduler;
+  }
+
   public FiniteStateMachineImpl(STATE state) {
     this.state = state;
+    this.scheduler = null;
   }
 
   @Override
-  public FiniteStateMachine<STATE, EVENT> link(Link<STATE, EVENT> link) {
+  public synchronized FiniteStateMachine<STATE, EVENT> link(Link<STATE, EVENT> link) {
     val eventToStateActions =
         stateTransitionsMap.computeIfAbsent(link.getSourceState(), (k) -> new HashMap<>());
     if (eventToStateActions.containsKey(link.getEvent())) {
@@ -38,12 +53,27 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
               .formatted(link.getEvent(), eventToStateActions.get(link.getEvent()).getState()));
     }
     eventToStateActions.put(
-        link.getEvent(), new StateAndActions<>(link.getTargetState(), link.getActions()));
+        link.getEvent(),
+        new StateAndActions<>(link.getTargetState(), link.getActions(), link.getDelayed()));
+
+    if (link.getDelayed() != null) {
+      if (scheduler == null) {
+        throw new IllegalStateException(
+            "Scheduler is not initialized, so cannot use delayed events");
+      }
+      if (!stateTransitionsMap
+          .computeIfAbsent(link.getTargetState(), (k) -> new HashMap<>())
+          .containsKey(link.getDelayed().getEvent())) {
+        throw new IllegalStateException(
+            "Delayed event %s does not exist for state %s"
+                .formatted(link.getDelayed(), link.getSourceState()));
+      }
+    }
     return this;
   }
 
   @Override
-  public STATE performEvent(EVENT event) {
+  public synchronized STATE performEvent(EVENT event) {
     val eventToStateActions = stateTransitionsMap.getOrDefault(state, Map.of());
     val stateAndActions = eventToStateActions.get(event);
     if (stateAndActions == null) {
@@ -66,6 +96,14 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
               }
             });
     state = stateAndActions.getState();
+
+    if (stateAndActions.getDelayed() != null) {
+      scheduler.schedule(
+          state,
+          stateAndActions.getDelayed().getEvent(),
+          stateAndActions.getDelayed().getDuration(),
+          this);
+    }
     return state;
   }
 }

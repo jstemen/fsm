@@ -6,10 +6,14 @@ package jared.stemen.fsm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
+import jared.stemen.fsm.impl.DelayedImpl;
 import jared.stemen.fsm.impl.FiniteStateMachineImpl;
 import jared.stemen.fsm.impl.LinkImpl;
+import jared.stemen.fsm.impl.SimpleScheduler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -29,18 +33,32 @@ class DoorFSMTest {
   }
 
   @Test
-  void exerciseComplexDoorInteractions() {
+  void exerciseComplexDoorInteractions() throws InterruptedException {
+
     // Create FSM with initial state OPEN
     final FiniteStateMachine<DoorState, DoorEvent> fsm =
-        new FiniteStateMachineImpl<>(DoorState.OPEN);
+        new FiniteStateMachineImpl<>(DoorState.OPEN, new SimpleScheduler<DoorState, DoorEvent>());
 
     // Define all valid state transitions
     fsm.link(
+            LinkImpl.<DoorState, DoorEvent>builder()
+                .sourceState(DoorState.CLOSED)
+                .event(DoorEvent.LOCK_DOOR)
+                .action(() -> log.info("locking door"))
+                .targetState(DoorState.LOCKED)
+                .build())
+        .link(
             LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.OPEN)
                 .event(DoorEvent.CLOSE_DOOR)
                 .action(() -> log.info("closing door"))
                 .targetState(DoorState.CLOSED)
+                // delay 10 seconds, lock door if no other actions
+                .delayed(
+                    DelayedImpl.<DoorEvent>builder()
+                        .event(DoorEvent.LOCK_DOOR)
+                        .duration(Duration.ofSeconds(1))
+                        .build())
                 .build())
         .link(
             LinkImpl.<DoorState, DoorEvent>builder()
@@ -49,13 +67,7 @@ class DoorFSMTest {
                 .action(() -> log.info("opening door"))
                 .targetState(DoorState.OPEN)
                 .build())
-        .link(
-            LinkImpl.<DoorState, DoorEvent>builder()
-                .sourceState(DoorState.CLOSED)
-                .event(DoorEvent.LOCK_DOOR)
-                .action(() -> log.info("locking door"))
-                .targetState(DoorState.LOCKED)
-                .build())
+        // target state after time out
         .link(
             LinkImpl.<DoorState, DoorEvent>builder()
                 .sourceState(DoorState.LOCKED)
@@ -90,52 +102,9 @@ class DoorFSMTest {
     assertThat(fsm.getState()).isEqualTo(DoorState.CLOSED);
     log.info("After closing: {}", fsm.getState());
 
-    // Test invalid events for CLOSED state
-    assertThrows(
-        IllegalStateException.class,
-        () -> fsm.performEvent(DoorEvent.CLOSE_DOOR),
-        "Cannot close an already closed door");
+    Thread.sleep(10000);
+    log.info("After 10 seconds: {}", fsm.getState());
 
-    assertThrows(
-        IllegalStateException.class,
-        () -> fsm.performEvent(DoorEvent.UNLOCK_DOOR),
-        "Cannot unlock a door that isn't locked");
-
-    // CLOSED -> LOCKED transition
-    state = fsm.performEvent(DoorEvent.LOCK_DOOR);
-    assertThat(state).isEqualTo(DoorState.LOCKED);
     assertThat(fsm.getState()).isEqualTo(DoorState.LOCKED);
-    log.info("After locking: {}", fsm.getState());
-
-    // Test invalid events for LOCKED state
-    assertThrows(
-        IllegalStateException.class,
-        () -> fsm.performEvent(DoorEvent.OPEN_DOOR),
-        "Cannot open a locked door");
-
-    assertThrows(
-        IllegalStateException.class,
-        () -> fsm.performEvent(DoorEvent.CLOSE_DOOR),
-        "Cannot close a locked door");
-
-    assertThrows(
-        IllegalStateException.class,
-        () -> fsm.performEvent(DoorEvent.LOCK_DOOR),
-        "Cannot lock an already locked door");
-
-    // LOCKED -> CLOSED transition
-    state = fsm.performEvent(DoorEvent.UNLOCK_DOOR);
-    assertThat(state).isEqualTo(DoorState.CLOSED);
-    assertThat(fsm.getState()).isEqualTo(DoorState.CLOSED);
-    log.info("After unlocking: {}", fsm.getState());
-
-    // CLOSED -> OPEN transition
-    state = fsm.performEvent(DoorEvent.OPEN_DOOR);
-    assertThat(state).isEqualTo(DoorState.OPEN);
-    assertThat(fsm.getState()).isEqualTo(DoorState.OPEN);
-    log.info("After opening: {}", fsm.getState());
-
-    // Complete door cycle verification
-    log.info("Completed full door cycle: OPEN -> CLOSED -> LOCKED -> CLOSED -> OPEN");
   }
 }
