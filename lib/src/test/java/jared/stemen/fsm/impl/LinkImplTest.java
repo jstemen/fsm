@@ -3,6 +3,7 @@ package jared.stemen.fsm.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -194,5 +195,53 @@ class LinkImplTest {
                     .build())
         .isInstanceOf(NullPointerException.class)
         .hasMessageContaining("event");
+  }
+
+  @Test
+  void shouldReturnEmptyOptionalWhenDelayedIsNull() {
+    // Given
+    TestState sourceState = TestState.STATE_A;
+    TestState targetState = TestState.STATE_B;
+    TestEvent event = TestEvent.EVENT_1;
+
+    // When
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
+            .sourceState(sourceState)
+            .targetState(targetState)
+            .event(event)
+            .build(); // No delayed specified, so it's null
+
+    // Then
+    assertThat(linkImpl.getDelayedOpt()).isNotNull();
+    assertThat(linkImpl.getDelayedOpt().isPresent()).isFalse();
+  }
+
+  @Test
+  void shouldReturnNonEmptyOptionalWhenDelayedIsPresent() {
+    // Given
+    TestState sourceState = TestState.STATE_A;
+    TestState targetState = TestState.STATE_B;
+    TestEvent event = TestEvent.EVENT_1;
+    TestEvent delayedEvent = TestEvent.EVENT_2;
+    Duration duration = Duration.ofSeconds(5);
+
+    DelayedImpl<TestEvent> delayed = new DelayedImpl<>(delayedEvent, duration);
+
+    // When
+    LinkImpl<TestState, TestEvent> linkImpl =
+        LinkImpl.<TestState, TestEvent>builder()
+            .sourceState(sourceState)
+            .targetState(targetState)
+            .event(event)
+            .delayed(delayed)
+            .build();
+
+    // Then
+    assertThat(linkImpl.getDelayedOpt()).isNotNull();
+    assertThat(linkImpl.getDelayedOpt().isPresent()).isTrue();
+    assertThat(linkImpl.getDelayedOpt().get()).isSameAs(delayed);
+    assertThat(linkImpl.getDelayedOpt().get().getEvent()).isEqualTo(delayedEvent);
+    assertThat(linkImpl.getDelayedOpt().get().getDuration()).isEqualTo(duration);
   }
 }

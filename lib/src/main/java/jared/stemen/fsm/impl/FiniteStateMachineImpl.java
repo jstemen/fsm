@@ -3,6 +3,7 @@ package jared.stemen.fsm.impl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
 
 import jared.stemen.fsm.FiniteStateMachine;
 import jared.stemen.fsm.Link;
@@ -13,10 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
   @NonNull private STATE state;
 
-  @NonNull private final Optional<SimpleSchedulerImpl<STATE, EVENT>> scheduler;
+  @NonNull private final Optional<SimpleSchedulerImpl<STATE, EVENT>> schedulerOpt;
 
   private final Map<STATE, Map<EVENT, StateAndActions<STATE, EVENT>>> stateTransitionsMap =
       new HashMap<>();
+  private Optional<ScheduledFuture<?>> scheduledFutureOpt = Optional.empty();
 
   // priority Queue future scheduled time, other need to track trasnistion
   // on kick state, enqueue the follow up action into priority queue
@@ -34,14 +36,14 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
    * @param state The initial state of the FSM
    * @throws NullPointerException if the provided state is null
    */
-  public FiniteStateMachineImpl(STATE state, SimpleSchedulerImpl<STATE, EVENT> scheduler) {
+  public FiniteStateMachineImpl(STATE state, SimpleSchedulerImpl<STATE, EVENT> schedulerOpt) {
     this.state = state;
-    this.scheduler = Optional.ofNullable(scheduler);
+    this.schedulerOpt = Optional.ofNullable(schedulerOpt);
   }
 
   public FiniteStateMachineImpl(STATE state) {
     this.state = state;
-    this.scheduler = null;
+    this.schedulerOpt = null;
   }
 
   @Override
@@ -59,7 +61,7 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
     link.getDelayedOpt()
         .ifPresent(
             delayed -> {
-              scheduler.ifPresentOrElse(
+              schedulerOpt.ifPresentOrElse(
                   scheduler -> {
                     if (!stateTransitionsMap
                         .computeIfAbsent(link.getTargetState(), (k) -> new HashMap<>())
@@ -79,6 +81,9 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
 
   @Override
   public synchronized STATE performEvent(EVENT event) {
+    // Try to cancel scheduled future if exists.
+    scheduledFutureOpt.ifPresent(scheduledFuture -> scheduledFuture.cancel(false));
+
     val eventToStateActions = stateTransitionsMap.getOrDefault(state, Map.of());
     val stateAndActions = eventToStateActions.get(event);
     if (stateAndActions == null) {
@@ -106,8 +111,12 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
         .getDelayed()
         .ifPresent(
             delayed -> {
-              scheduler.ifPresentOrElse(
-                  s -> s.schedule(state, delayed.getEvent(), delayed.getDuration(), this),
+              schedulerOpt.ifPresentOrElse(
+                  scheduler ->
+                      scheduledFutureOpt =
+                          Optional.ofNullable(
+                              scheduler.schedule(
+                                  state, delayed.getEvent(), delayed.getDuration(), this)),
                   () -> {
                     throw new IllegalStateException("Scheduler is not initialized");
                   });
