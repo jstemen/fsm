@@ -3,6 +3,7 @@ package jared.stemen.fsm.impl;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import jared.stemen.fsm.FiniteStateMachine;
 import jared.stemen.fsm.SimpleScheduler;
@@ -15,10 +16,10 @@ public class SimpleSchedulerImpl<STATE, EVENT> implements SimpleScheduler {
 
   private final ScheduledExecutorService executor;
 
-  public void schedule(
+  public ScheduledFuture<?> schedule(
       STATE originalState, EVENT event, Duration delay, FiniteStateMachine<STATE, EVENT> fsm) {
 
-    executor.schedule(
+    return executor.schedule(
         () -> {
           // In the scheduled task execution
           try {

@@ -1,6 +1,7 @@
 package jared.stemen.fsm;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a transition link in a Finite State Machine (FSM).
@@ -39,7 +40,7 @@ public interface Link<STATE, EVENT> {
    */
   EVENT getEvent();
 
-  Delayed<EVENT> getDelayed();
+  Optional<Delayed<EVENT>> getDelayedOpt();
 
   /**
    * Gets the list of actions to execute when this transition link is followed.

@@ -2,6 +2,7 @@ package jared.stemen.fsm.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import jared.stemen.fsm.FiniteStateMachine;
 import jared.stemen.fsm.Link;
@@ -10,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
-  @Getter @NonNull private STATE state;
+  @NonNull private STATE state;
 
-  private final SimpleSchedulerImpl<STATE, EVENT> scheduler;
+  @NonNull private final Optional<SimpleSchedulerImpl<STATE, EVENT>> scheduler;
 
   private final Map<STATE, Map<EVENT, StateAndActions<STATE, EVENT>>> stateTransitionsMap =
       new HashMap<>();
@@ -35,7 +36,7 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
    */
   public FiniteStateMachineImpl(STATE state, SimpleSchedulerImpl<STATE, EVENT> scheduler) {
     this.state = state;
-    this.scheduler = scheduler;
+    this.scheduler = Optional.ofNullable(scheduler);
   }
 
   public FiniteStateMachineImpl(STATE state) {
@@ -54,21 +55,25 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
     }
     eventToStateActions.put(
         link.getEvent(),
-        new StateAndActions<>(link.getTargetState(), link.getActions(), link.getDelayed()));
-
-    if (link.getDelayed() != null) {
-      if (scheduler == null) {
-        throw new IllegalStateException(
-            "Scheduler is not initialized, so cannot use delayed events");
-      }
-      if (!stateTransitionsMap
-          .computeIfAbsent(link.getTargetState(), (k) -> new HashMap<>())
-          .containsKey(link.getDelayed().getEvent())) {
-        throw new IllegalStateException(
-            "Delayed event %s does not exist for state %s"
-                .formatted(link.getDelayed(), link.getSourceState()));
-      }
-    }
+        new StateAndActions<>(link.getTargetState(), link.getActions(), link.getDelayedOpt()));
+    link.getDelayedOpt()
+        .ifPresent(
+            delayed -> {
+              scheduler.ifPresentOrElse(
+                  scheduler -> {
+                    if (!stateTransitionsMap
+                        .computeIfAbsent(link.getTargetState(), (k) -> new HashMap<>())
+                        .containsKey(delayed.getEvent())) {
+                      throw new IllegalStateException(
+                          "Delayed event %s does not exist for state %s"
+                              .formatted(delayed, link.getSourceState()));
+                    }
+                  },
+                  () -> {
+                    throw new IllegalStateException(
+                        "Scheduler is not initialized, so cannot use delayed events");
+                  });
+            });
     return this;
   }
 
@@ -97,13 +102,21 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
             });
     state = stateAndActions.getState();
 
-    if (stateAndActions.getDelayed() != null) {
-      scheduler.schedule(
-          state,
-          stateAndActions.getDelayed().getEvent(),
-          stateAndActions.getDelayed().getDuration(),
-          this);
-    }
+    stateAndActions
+        .getDelayed()
+        .ifPresent(
+            delayed -> {
+              scheduler.ifPresentOrElse(
+                  s -> s.schedule(state, delayed.getEvent(), delayed.getDuration(), this),
+                  () -> {
+                    throw new IllegalStateException("Scheduler is not initialized");
+                  });
+            });
+    return state;
+  }
+
+  @Override
+  public synchronized STATE getState() {
     return state;
   }
 }
