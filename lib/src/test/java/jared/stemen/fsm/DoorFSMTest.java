@@ -10,10 +10,7 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 
-import jared.stemen.fsm.impl.DelayedImpl;
-import jared.stemen.fsm.impl.FiniteStateMachineImpl;
-import jared.stemen.fsm.impl.LinkImpl;
-import jared.stemen.fsm.impl.SimpleScheduler;
+import jared.stemen.fsm.impl.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,7 +34,8 @@ class DoorFSMTest {
 
     // Create FSM with initial state OPEN
     final FiniteStateMachine<DoorState, DoorEvent> fsm =
-        new FiniteStateMachineImpl<>(DoorState.OPEN, new SimpleScheduler<DoorState, DoorEvent>());
+        new FiniteStateMachineImpl<>(
+            DoorState.OPEN, new SimpleSchedulerImpl<DoorState, DoorEvent>());
 
     // Define all valid state transitions
     fsm.link(

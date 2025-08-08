@@ -5,24 +5,25 @@ import java.time.Instant;
 import java.util.PriorityQueue;
 
 import jared.stemen.fsm.FiniteStateMachine;
+import jared.stemen.fsm.SimpleScheduler;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @Slf4j
-public class SimpleScheduler<STATE, EVENT> {
+public class SimpleSchedulerImpl<STATE, EVENT> implements SimpleScheduler {
 
   private final PriorityQueue<Task<STATE, EVENT>> pq = new PriorityQueue<>();
 
   // todo the single thread should outsource task to a worker thread pool to reduce the impact of
   // long running tasks from blocking other tasks
-  public SimpleScheduler() {
+  public SimpleSchedulerImpl() {
     Thread t =
         new Thread(
             () -> {
               while (true) {
-                synchronized (SimpleScheduler.this) {
+                synchronized (SimpleSchedulerImpl.this) {
                   while (!pq.isEmpty() && !pq.peek().due.isBefore(Instant.now())) {
                     Task<STATE, EVENT> task = pq.poll();
 
@@ -48,7 +49,7 @@ public class SimpleScheduler<STATE, EVENT> {
                 try {
                   Thread.sleep(1000L);
                 } catch (InterruptedException e) {
-                  throw new RuntimeException(e);
+                  log.error("Scheduler thread interrupted", e);
                 }
               }
             });

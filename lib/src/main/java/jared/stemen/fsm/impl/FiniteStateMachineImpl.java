@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<STATE, EVENT> {
   @Getter @NonNull private STATE state;
 
-  private final SimpleScheduler<STATE, EVENT> scheduler;
+  private final SimpleSchedulerImpl<STATE, EVENT> scheduler;
 
   private final Map<STATE, Map<EVENT, StateAndActions<STATE, EVENT>>> stateTransitionsMap =
       new HashMap<>();
@@ -33,7 +33,7 @@ public class FiniteStateMachineImpl<STATE, EVENT> implements FiniteStateMachine<
    * @param state The initial state of the FSM
    * @throws NullPointerException if the provided state is null
    */
-  public FiniteStateMachineImpl(STATE state, SimpleScheduler<STATE, EVENT> scheduler) {
+  public FiniteStateMachineImpl(STATE state, SimpleSchedulerImpl<STATE, EVENT> scheduler) {
     this.state = state;
     this.scheduler = scheduler;
   }
