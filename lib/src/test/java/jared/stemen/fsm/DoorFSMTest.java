@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
+import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +36,7 @@ class DoorFSMTest {
     // Create FSM with initial state OPEN
     final FiniteStateMachine<DoorState, DoorEvent> fsm =
         new FiniteStateMachineImpl<>(
-            DoorState.OPEN, new SimpleSchedulerImpl<DoorState, DoorEvent>());
+            DoorState.OPEN, new SimpleSchedulerImpl<>(Executors.newScheduledThreadPool(8)));
 
     // Define all valid state transitions
     fsm.link(
@@ -100,8 +101,8 @@ class DoorFSMTest {
     assertThat(fsm.getState()).isEqualTo(DoorState.CLOSED);
     log.info("After closing: {}", fsm.getState());
 
-    Thread.sleep(10000);
-    log.info("After 10 seconds: {}", fsm.getState());
+    Thread.sleep(2000);
+    log.info("After 2 seconds: {}", fsm.getState());
 
     assertThat(fsm.getState()).isEqualTo(DoorState.LOCKED);
   }
